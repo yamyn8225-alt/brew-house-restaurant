@@ -1,0 +1,9 @@
+(function(){
+'use strict';
+const form=document.getElementById('checkout-form');const summary=document.getElementById('checkout-summary');const error=document.getElementById('form-error');const success=document.getElementById('order-success');
+if(!form||!summary)return;
+const money=window.BrewMoney;
+function render(){const t=window.BrewCart.totals();if(!t.rows.length){summary.innerHTML='<h2>Order Summary</h2><p>Your cart is empty.</p><a href="menu.html" class="btn btn-gold">Browse Menu ↗</a>';form.querySelector('[type=submit]').disabled=true;return;}form.querySelector('[type=submit]').disabled=false;const lines=t.rows.map(({product:p,quantity:q})=>`<div class="order-line"><img src="${p.image}" alt=""><span>${p.name}<small>Qty: ${q}</small></span><strong>${money(p.price*q)}</strong></div>`).join('');summary.innerHTML=`<h2>Order Summary</h2><div class="order-lines">${lines}</div><hr style="border:0;border-top:1px solid #eee2d6;margin:22px 0">${window.BrewSummaryHTML(t,false).replace('<h2>Order Summary</h2>','')}`;}
+window.renderCheckout=render;render();
+form.addEventListener('submit',event=>{event.preventDefault();error.textContent='';if(!window.BrewCart.totals().rows.length){error.textContent='Your cart is empty.';return;}const name=form.elements.name.value.trim(),phone=form.elements.phone.value.trim(),address=form.elements.address.value.trim();if(name.length<2){error.textContent='Please enter your full name (at least 2 characters).';form.elements.name.focus();return;}if(!/^\+?[0-9\s()-]{8,18}$/.test(phone)){error.textContent='Please enter a valid phone number (8–18 characters, digits and optional separators).';form.elements.phone.focus();return;}if(address.length<8){error.textContent='Please enter your delivery address (at least 8 characters).';form.elements.address.focus();return;}window.BrewCart.clear();form.hidden=true;summary.hidden=true;success.hidden=false;success.scrollIntoView({behavior:'smooth',block:'center'});});
+})();
